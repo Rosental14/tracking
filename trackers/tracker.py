@@ -1,4 +1,4 @@
-from utils.bbox_utils import get_center_of_bbox, get_bbox_width
+from utils.bbox_utils import get_center_of_bbox, get_bbox_width, get_foot_position
 from ultralytics import YOLO
 import numpy as np
 import pandas as pd
@@ -15,6 +15,19 @@ class Tracker:
         self.model = YOLO(model_path)
         self.tracker = sv.ByteTrack()
         
+    def add_position_to_tracks(self, tracks):
+        for object, object_tracks in tracks.items():
+            for frame_num, track in enumerate(object_tracks):
+                for track_id, track_info in track.items():
+                    bbox = track_info['bbox']
+                    if object == 'ball':
+                        position = get_center_of_bbox(bbox)
+                    else:
+                        position = get_foot_position(bbox)
+                    tracks[object][frame_num][track_id]['position'] = position
+                    
+    
+        
     def interpolate_ball_positions(self, ball_positions):
         ball_positions = [x.get(1, {}).get('bbox', []) for x in ball_positions]
         df_ball_positions = pd.DataFrame(ball_positions, columns=['x1', 'y1', 'x2', 'y2'])
@@ -27,7 +40,6 @@ class Tracker:
         
         return ball_positions
         
-
     def detect_frames(self, frames):
         batch_size = 20
         detections = []
@@ -178,7 +190,6 @@ class Tracker:
         cv2.putText(frame, f"Team 2 Possession: {team_2*100:.2f}%", (1450,1050), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
         
         return frame
-        
         
     def draw_annotations(self, video_frames, tracks, team_ball_control):
         output_video_frames = []

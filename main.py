@@ -5,6 +5,7 @@ import numpy as np
 from team_assigner import TeamAssigner
 from player_ball_assigner.player_ball_assigner import PlayerBallAssigner
 from camera_movement_estimator.camera_movement_estimator import CameraMovementEstimator
+from view_transformer.view_transformer import ViewTransformer
 
 def main():
     # Read Video
@@ -17,11 +18,21 @@ def main():
                                        read_from_stub=True,
                                        stub_path='stubs/track_stubs.pkl')
     
+    # Get Object Positions
+    tracker.add_position_to_tracks(tracks)
+    
+    
     # Camera Movement Estimator
     camera_movement_estimator = CameraMovementEstimator(video_frames[0])
     camera_movement_per_frame = camera_movement_estimator.get_camera_movement(video_frames,
                                                                               read_from_stub=True,
                                                                               stub_path='stubs/camera_movement_stub.pkl')
+    camera_movement_estimator.add_adjust_positions_to_tracks(tracks, camera_movement_per_frame)
+    
+    
+    # View Transformer 
+    view_transformer = ViewTransformer()
+    view_transformer.add_transformed_position_to_tracks(tracks)
     
     
     # Interpolate Ball Positions
@@ -55,7 +66,7 @@ def main():
         else:
             #Estava obtendo erro neste trecho quando utilizava o código recomendado
             #por isso adicionei este trecho para adicionar (1)caso a lista não tenha nenhum item
-             # Verifica se team_ball_control já tem algum valor para usar o último, ou adiciona um valor padrão (1)
+            # Verifica se team_ball_control já tem algum valor para usar o último, ou adiciona um valor padrão (1)
             if team_ball_control:
                 team_ball_control.append(team_ball_control[-1])
             else:
