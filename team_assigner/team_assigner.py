@@ -23,13 +23,13 @@ class TeamAssigner:
         
         
         # Get Clustering Model
-        kmeans = self.get_clustering_model(top_half_image)
+        kmeans = self.get_clustering_model(image)
         
         # Get the cluster labels for each pixel
         labels = kmeans.labels_
         
         # Reshape the labels to the image shape
-        clustered_image = labels.reshape(top_half_image.shape[0], top_half_image.shape[1])
+        clustered_image = labels.reshape(image.shape[0], image.shape[1])
         
         # Get the player cluster
         corner_clusters = [clustered_image[0, 0], clustered_image[0, -1], clustered_image[-1, 0], clustered_image[-1, -1]]
